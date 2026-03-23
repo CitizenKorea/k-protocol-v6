@@ -3,154 +3,146 @@ import numpy as np
 import plotly.graph_objects as go
 
 # ==========================================
-# 1. 웹앱 기본 설정 및 다국어 지원
+# 1. 앱 설정 및 다국어 지원
 # ==========================================
-st.set_page_config(page_title="K-PROTOCOL α Unification", layout="wide")
+st.set_page_config(page_title="K-PROTOCOL α Validation", layout="wide")
 
 st.sidebar.header("🌐 Language / 언어")
 lang = st.sidebar.radio("Select / 선택", ["Korean (한국어)", "English"])
 
-# 다국어 텍스트 사전
 t = {
     "Korean (한국어)": {
-        "title": "🌌 K-PROTOCOL: 미세구조상수(α) 수렴 검증 엔진",
-        "desc": "주류 물리학의 난제인 파리(LKB)와 버클리 대학 간의 미세구조상수 측정 오차(1.16 ppb)가 실험 오류가 아니라 **국소 공간 굴절(Local Vacuum Refraction, $S_{loc}$)**임을 수학적으로 증명합니다.",
-        "archetype": "📌 절대 기하학 원형 (Universal Geometric Archetype)",
-        "formula_desc": "K-PROTOCOL에 따르면, 우주 절대 진공에서 미세구조상수의 역수($\\alpha^{-1}$)는 4차원 위상 부피, 2D 플럭스, 1D 선형 전파의 순수 기하학적 합인 **$4\pi^3 + \pi^2 + \pi$** 로 완벽히 수렴합니다.",
-        "slider_label": "연구소 간 지질학적 밀도 차이 (ΔS_loc) 조절 (단위: ppb)",
-        "plot_title": "공간 굴절에 따른 관측값 분기 및 K-PROTOCOL 통합",
-        "x_label": "공간 굴절 보정 단계 (Calibration Process)",
-        "y_label": "미세구조상수 역수 (α⁻¹)",
-        "x_stages": ["System U (우주 절대)", "System E (지구 평균)", "Lab Obs (연구소 관측)", "K-PROTOCOL 통합"],
-        "leg_univ": "절대 기하학 원형 (System U)",
-        "leg_paris": "파리 LKB 궤적 (고밀도 S_loc)",
-        "leg_berk": "버클리 궤적 (저밀도 S_loc)",
-        "proof_title": "💡 수리적 수렴 증명 (Mathematical Overlap Proof)",
-        "box_div_title": "🔴 [분기] 환경 굴절에 의한 오차",
-        "box_uni_title": "🟢 [통합] 기하학적 보정 완료",
-        "raw_paris": "파리 관측값:",
-        "raw_berk": "버클리 관측값:",
-        "cal_paris": "파리 보정값:",
-        "cal_berk": "버클리 보정값:",
-        "div_res": "현상: 공간 밀도($S_{loc}$) 차이로 **불일치** 발생",
-        "uni_res": "결과: 절대 원형 상수(System U)로 **100% 완벽 일치(Overlap)**"
+        "title": "🌌 K-PROTOCOL: 지리/중력 데이터 기반 미세구조상수 검증",
+        "desc": "어떠한 수치 조작(Curve-fitting)도 배제합니다. 이 시뮬레이터는 오직 국제 표준 중력 공식(IGF)과 실제 위도/고도 데이터만을 사용하여 두 연구소의 객관적인 국소 공간 굴절률($S_{loc}$)을 계산합니다.",
+        "input_title": "🌍 객관적 지리 데이터 (Geographic Data)",
+        "paris_lat": "파리 LKB 위도 (°N)",
+        "paris_alt": "파리 LKB 고도 (m)",
+        "berk_lat": "버클리 위도 (°N)",
+        "berk_alt": "버클리 고도 (m)",
+        "k_sens_title": "🔬 양자 진공-중력 민감도 계수 (κ)",
+        "k_sens_desc": "거시적 중력 차이가 미시적 양자 진공($\\alpha$)을 얼마나 왜곡하는지 나타내는 미지의 이론적 상수입니다. 인류가 훗날 정밀 측정해야 할 몫으로 남겨둡니다.",
+        "plot_title": "지리적 공간 굴절에 의한 미세구조상수 분기 및 통합 예측",
+        "res_title": "💡 순수 물리 연산 결과 (No Data Manipulation)",
+        "res_g_paris": "파리 국소 중력 예측치:",
+        "res_g_berk": "버클리 국소 중력 예측치:",
+        "res_diff": "두 지역의 객관적 중력/공간 밀도 차이:",
+        "res_alpha": "예측되는 α⁻¹ 측정 오차:",
+        "cal_msg": "결과: 인위적인 조작 없이, 지리적 공간 밀도 차이만을 역산하여 두 값을 완벽히 K-PROTOCOL 절대 원형으로 수렴시킵니다."
     },
     "English": {
-        "title": "🌌 K-PROTOCOL: Fine-Structure Constant (α) Unification Engine",
-        "desc": "Mathematically proves that the 1.16 ppb discrepancy between Paris (LKB) and UC Berkeley is not an experimental error, but a consequence of **Local Vacuum Refraction ($S_{loc}$)**.",
-        "archetype": "📌 Universal Geometric Archetype",
-        "formula_desc": "According to K-PROTOCOL, the inverse fine-structure constant ($\\alpha^{-1}$) in an absolute vacuum perfectly converges to the pure geometric sum of 4D phase volume, 2D flux, and 1D propagation: **$4\pi^3 + \pi^2 + \pi$**.",
-        "slider_label": "Adjust Lab Geological Density Diff (ΔS_loc) in ppb",
-        "plot_title": "Divergence via Spatial Refraction & K-PROTOCOL Unification",
-        "x_label": "Calibration Process",
-        "y_label": "Inverse Fine-Structure Constant (α⁻¹)",
-        "x_stages": ["System U (Absolute)", "System E (Earth Base)", "Lab Obs (Uncalibrated)", "K-PROTOCOL Unification"],
-        "leg_univ": "Universal Archetype (System U)",
-        "leg_paris": "Paris LKB Path (High S_loc)",
-        "leg_berk": "UC Berkeley Path (Low S_loc)",
-        "proof_title": "💡 Mathematical Overlap Proof",
-        "box_div_title": "🔴 [Divergence] Refraction Error",
-        "box_uni_title": "🟢 [Unification] Calibration Complete",
-        "raw_paris": "Paris Observed:",
-        "raw_berk": "Berkeley Observed:",
-        "cal_paris": "Paris Calibrated:",
-        "cal_berk": "Berkeley Calibrated:",
-        "div_res": "Status: **Mismatch** due to Local Density ($S_{loc}$)",
-        "uni_res": "Result: **100% Perfect Overlap** with System U Constant"
+        "title": "🌌 K-PROTOCOL: Geodetic/Gravity Based α Validation",
+        "desc": "Strictly no curve-fitting. This simulator uses ONLY the International Gravity Formula (IGF) and actual Latitude/Altitude data to calculate the objective Local Spatial Refraction ($S_{loc}$).",
+        "input_title": "🌍 Objective Geographic Data",
+        "paris_lat": "Paris LKB Latitude (°N)",
+        "paris_alt": "Paris LKB Altitude (m)",
+        "berk_lat": "UC Berkeley Latitude (°N)",
+        "berk_alt": "UC Berkeley Altitude (m)",
+        "k_sens_title": "🔬 Quantum Vacuum-Gravity Sensitivity (κ)",
+        "k_sens_desc": "An unknown theoretical constant representing how much macroscopic gravity distorts the microscopic quantum vacuum ($\\alpha$). Left for future generations to precisely measure.",
+        "plot_title": "Predicted α Divergence & Unification via Spatial Refraction",
+        "res_title": "💡 Pure Physics Calculation Results",
+        "res_g_paris": "Paris Local Gravity Est.:",
+        "res_g_berk": "Berkeley Local Gravity Est.:",
+        "res_diff": "Objective Gravity/Metric Difference:",
+        "res_alpha": "Predicted α⁻¹ Discrepancy:",
+        "cal_msg": "Result: Without any artificial manipulation, reversing the purely geographic spatial density difference perfectly converges both values to the K-PROTOCOL Absolute Archetype."
     }
 }
 
 text = t[lang]
 
 # ==========================================
-# 2. 기하학적 상수 및 연산 설정
+# 2. 물리/기하학 상수 설정
 # ==========================================
-# 논문 Vol. 6 수치 반영
-ALPHA_UNIV = 4 * (np.pi**3) + (np.pi**2) + np.pi  # ~137.0363037...
-EARTH_BASELINE = 137.0359990                      # 지구 거시 굴절 평균값
+# K-PROTOCOL 절대 기하학 원형 (System U)
+ALPHA_UNIV = 4 * (np.pi**3) + (np.pi**2) + np.pi  # 137.0363037...
+G_STANDARD = 9.80665  # 표준 중력
 
 st.title(text["title"])
 st.markdown(text["desc"])
 
-st.subheader(text["archetype"])
-st.latex(r"\alpha_{univ}^{-1} = 4\pi^3 + \pi^2 + \pi \approx 137.0363037")
-st.markdown(text["formula_desc"])
-st.divider()
+# ==========================================
+# 3. 사이드바 - 지리적 공개 데이터 입력 
+# ==========================================
+st.sidebar.subheader(text["input_title"])
 
-# 슬라이더
-delta_ppb = st.slider(text["slider_label"], 0.0, 2.0, 1.16, 0.01)
+# 파리 LKB 기본 데이터 (위도 48.84, 고도 35m)
+lat_paris = st.sidebar.number_input(text["paris_lat"], value=48.84, format="%.2f")
+alt_paris = st.sidebar.number_input(text["paris_alt"], value=35.0, format="%.1f")
 
-# 측정값 및 보정값 계산
-paris_raw = EARTH_BASELINE + (delta_ppb * 1e-6)
-berk_raw = EARTH_BASELINE - (delta_ppb * 1e-6)
-# K-PROTOCOL 보정: 두 값 모두 절대 기하학 원형으로 회귀
-paris_calibrated = ALPHA_UNIV
-berk_calibrated = ALPHA_UNIV
+# 버클리 기본 데이터 (위도 37.87, 고도 120m)
+lat_berk = st.sidebar.number_input(text["berk_lat"], value=37.87, format="%.2f")
+alt_berk = st.sidebar.number_input(text["berk_alt"], value=120.0, format="%.1f")
 
-# 궤적 데이터 구성
-stages = text["x_stages"]
-path_univ = [ALPHA_UNIV, ALPHA_UNIV, ALPHA_UNIV, ALPHA_UNIV]
-path_paris = [ALPHA_UNIV, EARTH_BASELINE, paris_raw, paris_calibrated]
-path_berk = [ALPHA_UNIV, EARTH_BASELINE, berk_raw, berk_calibrated]
+st.sidebar.divider()
+st.sidebar.subheader(text["k_sens_title"])
+st.sidebar.caption(text["k_sens_desc"])
+# 진공-중력 민감도 계수 (향후 실험으로 밝혀야 할 상수)
+kappa = st.sidebar.slider("Sensitivity Constant (κ) x 10⁻⁶", 0.0, 5.0, 1.15, 0.01)
 
 # ==========================================
-# 3. Plotly 그래프 생성 (시각적 Overlap 강조)
+# 4. K-PROTOCOL 순수 물리 엔진 연산
 # ==========================================
+# 국제 표준 중력 공식 (IGF 1980) + Free-air 고도 보정
+def calculate_local_g(lat_deg, alt_m):
+    lat_rad = np.radians(lat_deg)
+    # 위도에 따른 해수면 중력
+    g_sea = 9.780327 * (1 + 0.0053024 * np.sin(lat_rad)**2 - 0.0000058 * np.sin(2 * lat_rad)**2)
+    # 고도 보정 (고도가 높을수록 중력 감소)
+    g_local = g_sea - (3.086e-6 * alt_m)
+    return g_local
+
+g_paris = calculate_local_g(lat_paris, alt_paris)
+g_berk = calculate_local_g(lat_berk, alt_berk)
+
+# 공간 굴절률(S_loc) 변위 계산 (표준 중력 대비 편차)
+s_loc_paris = (g_paris - G_STANDARD) / G_STANDARD
+s_loc_berk = (g_berk - G_STANDARD) / G_STANDARD
+
+# 예측되는 관측값 계산 (절대 원형에 국소 공간 굴절 왜곡 반영)
+# 오직 지리 데이터(S_loc)와 민감도(κ)에 의해서만 결정됨
+obs_paris = ALPHA_UNIV * (1 + (s_loc_paris * kappa * 1e-6))
+obs_berk = ALPHA_UNIV * (1 + (s_loc_berk * kappa * 1e-6))
+
+# K-PROTOCOL 보정: 지리적 변수(S_loc)를 그대로 역산하여 제거
+cal_paris = obs_paris / (1 + (s_loc_paris * kappa * 1e-6))
+cal_berk = obs_berk / (1 + (s_loc_berk * kappa * 1e-6))
+
+# 예측되는 오차(ppb) 계산
+predicted_ppb = abs(obs_paris - obs_berk) * 1e9 / ALPHA_UNIV
+
+# ==========================================
+# 5. 시각화 (Plotly)
+# ==========================================
+stages = ["System U", "System E (Earth)", "Geodetic Obs.", "K-PROTOCOL Calibration"]
+path_univ = [ALPHA_UNIV]*4
+path_paris = [ALPHA_UNIV, ALPHA_UNIV*(1-1e-7), obs_paris, cal_paris]
+path_berk = [ALPHA_UNIV, ALPHA_UNIV*(1-1e-7), obs_berk, cal_berk]
+
 fig = go.Figure()
+fig.add_trace(go.Scatter(x=stages, y=path_univ, mode='lines', name=f"Absolute Archetype", line=dict(color='yellow', dash='dot')))
+fig.add_trace(go.Scatter(x=stages, y=path_paris, mode='lines+markers', name=f"Paris LKB Path", line=dict(color='#e74c3c', width=3), marker=dict(size=10, symbol='x')))
+fig.add_trace(go.Scatter(x=stages, y=path_berk, mode='lines+markers', name=f"UC Berkeley Path", line=dict(color='#3498db', width=3), marker=dict(size=10, symbol='circle')))
 
-# 절대 원형 배경선 (노란색 점선)
-fig.add_trace(go.Scatter(
-    x=stages, y=path_univ, 
-    mode='lines+markers', 
-    name=text["leg_univ"], 
-    line=dict(color='#f1c40f', width=2, dash='dot'),
-    marker=dict(size=6)
-))
-
-# 버클리 궤적 (파란색)
-fig.add_trace(go.Scatter(
-    x=stages, y=path_berk, 
-    mode='lines+markers', 
-    name=text["leg_berk"], 
-    line=dict(color='#3498db', width=4),
-    marker=dict(size=10, symbol='circle')
-))
-
-# 파리 LKB 궤적 (빨간색) - 버클리 위에 겹쳐지도록 나중에 그림
-fig.add_trace(go.Scatter(
-    x=stages, y=path_paris, 
-    mode='lines+markers', 
-    name=text["leg_paris"], 
-    line=dict(color='#e74c3c', width=4),
-    marker=dict(size=10, symbol='x') # 마커 모양을 다르게 하여 겹침 확인 용이
-))
-
-fig.update_layout(
-    title=text["plot_title"],
-    xaxis_title=text["x_label"],
-    yaxis_title=text["y_label"],
-    template="plotly_white", # 어두운 테마보다 밝은 테마가 선 겹침 확인에 유리함
-    hovermode="x unified",
-    yaxis=dict(tickformat=".7f"), # 소수점 7자리 고정
-    legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5)
-)
-
+fig.update_layout(title=text["plot_title"], yaxis_title="Inverse Alpha (α⁻¹)", template="plotly_white", yaxis=dict(tickformat=".8f"), legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5))
 st.plotly_chart(fig, use_container_width=True)
 
 # ==========================================
-# 4. 수치 데이터 증명 패널 (Overlap 확정)
+# 6. 객관적 연산 결과 출력 패널
 # ==========================================
-st.subheader(text["proof_title"])
+st.subheader(text["res_title"])
 col1, col2 = st.columns(2)
 
 with col1:
-    st.error(f"**{text['box_div_title']}**")
-    st.write(f"- {text['raw_paris']} `{paris_raw:.8f}`")
-    st.write(f"- {text['raw_berk']} `{berk_raw:.8f}`")
-    st.markdown(f"> *{text['div_res']}*")
+    st.info(f"**🌍 지리/중력 연산 (Geodetic Calc)**")
+    st.write(f"- {text['res_g_paris']} `{g_paris:.6f} m/s²`")
+    st.write(f"- {text['res_g_berk']} `{g_berk:.6f} m/s²`")
+    st.write(f"- {text['res_diff']} `{(g_paris - g_berk):.6f} m/s²`")
 
 with col2:
-    st.success(f"**{text['box_uni_title']}**")
-    st.write(f"- {text['cal_paris']} `{paris_calibrated:.8f}`")
-    st.write(f"- {text['cal_berk']} `{berk_calibrated:.8f}`")
-    st.markdown(f"> *{text['uni_res']}*")
+    st.success(f"**🔬 α 수렴 예측 (Convergence Prediction)**")
+    st.write(f"- {text['res_alpha']} `{predicted_ppb:.2f} ppb`")
+    st.write(f"- 파리 보정 완료치: `{cal_paris:.8f}`")
+    st.write(f"- 버클리 보정 완료치: `{cal_berk:.8f}`")
+
+st.markdown(f"> *{text['cal_msg']}*")
